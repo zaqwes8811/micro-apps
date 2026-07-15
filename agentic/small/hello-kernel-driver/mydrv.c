@@ -1,6 +1,7 @@
 #define CLASS_NAME "myclass"
 
 #include <linux/version.h>
+#include <linux/fs.h>
 #include <linux/module.h>
 #include <linux/init.h>
 #include <linux/kernel.h>
@@ -9,7 +10,7 @@
 #include <linux/cdev.h>
 
 static int my_major;
-static char *my_dev_name = "mydrv";
+static char *my_dev_name = "[x86_drv]";
 static struct cdev my_cdev;
 static struct class *my_class;
 static struct device *my_dev;

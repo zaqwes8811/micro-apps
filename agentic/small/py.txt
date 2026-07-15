@@ -1,0 +1,33 @@
+def factorial(n):
+    if n == 0:
+        return 1
+    else:
+        return n * factorial(n-1)
+
+def factorial(n):
+    if n == 0:
+        return 1
+    else:
+        return n * factorial(n-1)
+
+# Example usage
+print(factorial(5))
+
+from queue import Queue
+
+def add_two(a, b):
+    return a + b
+
+class _FifoQueue():
+    _queue = Queue()
+
+print('hello')
+
+from factorial import factorial
+
+def test_factorial():
+    assert factorial(5) == 120
+    assert factorial(0) == 1
+
+if __name__ == '__main__':
+    test_factorial()

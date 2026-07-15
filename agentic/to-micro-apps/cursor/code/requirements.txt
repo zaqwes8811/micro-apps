@@ -1,0 +1,9 @@
+kagglehub
+pandas
+numpy
+jieba
+srt
+Pillow
+matplotlib
+pypinyin
+pytest

@@ -1,28 +1,29 @@
 #define CLASS_NAME "myclass"
 
 #include <linux/version.h>
-#include <linux/fs.h>
 #include <linux/module.h>
 #include <linux/init.h>
 #include <linux/kernel.h>
 #include <linux/device.h>
 #include <linux/errno.h>
 #include <linux/cdev.h>
+#include <linux/fs.h>
 
 static int my_major;
 static char *my_dev_name = "[x86_drv]";
+static dev_t devno;
 static struct cdev my_cdev;
 static struct class *my_class;
 static struct device *my_dev;
 
 static int __init my_init(void) {
-    my_major = register_chrdev(0, my_dev_name, NULL);
+    my_major = alloc_chrdev_region(&devno, 0, 1, my_dev_name);
     if (my_major < 0) {
         pr_err("[x86_drv] failed to register char device\n");
         return my_major;
     }
     pr_info("[x86_drv] char device %d registered\n", my_major);
-    
+
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 4, 0)
     my_class = class_create(CLASS_NAME);
 #else
@@ -30,22 +31,22 @@ static int __init my_init(void) {
 #endif
     if (IS_ERR(my_class)) {
         pr_err("[x86_drv] failed to create class\n");
-        unregister_chrdev(my_major, my_dev_name);
+        unregister_chrdev_region(devno, 1);
         return PTR_ERR(my_class);
     }
     pr_info("[x86_drv] class created\n");
     
-    my_dev = device_create(my_class, NULL, MKDEV(my_major, 0), NULL, my_dev_name);
+    my_dev = device_create(my_class, NULL, MKDEV(devno, 0), NULL, my_dev_name);
     if (IS_ERR(my_dev)) {
         pr_err("[x86_drv] failed to create device\n");
         class_destroy(my_class);
-        unregister_chrdev(my_major, my_dev_name);
+        unregister_chrdev_region(devno, 1);
         return PTR_ERR(my_dev);
     }
     pr_info("[x86_drv] device created\n");
     
     cdev_init(&my_cdev, NULL);
-    cdev_add(&my_cdev, MKDEV(my_major, 0), 1);
+    cdev_add(&my_cdev, MKDEV(devno, 0), 1);
     pr_info("[x86_drv] cdev added\n");
     
     return 0;

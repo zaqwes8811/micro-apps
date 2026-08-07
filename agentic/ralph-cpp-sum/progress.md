@@ -17,7 +17,7 @@ Iteration log for Ralph. Agent: append what you did; check off items when verifi
 
 **Files created:**
 - `ralph_sum.hpp` - Header with template sum function
-- `test_ralph_sum.cpp` - Gtest tests (ints, floats, doubles, long ints, bools)
+- `test_ralph_sum.cpp` - Gtest tests (ints, floats, doubles, long longs, bools)
 - `CMakeLists.txt` - CMake build configuration
 
 **Build:**

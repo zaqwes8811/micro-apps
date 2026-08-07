@@ -15,7 +15,7 @@ Work only in this directory. Do not touch sibling projects under `agentic/`.
 - Prefer system `libgtest-dev` / CMake `find_package(GTest)` or FetchContent if needed.
 - Keep the project minimal: `CMakeLists.txt`, one header, one test source.
 - After each meaningful change: build, run tests, fix failures.
-- Commit progress in small steps (ralph may also auto-commit).
+- Do not run git commands (disabled in OpenCode); the human commits from the parent repo.
 
 ## Checklist (update `progress.md` each iteration)
 

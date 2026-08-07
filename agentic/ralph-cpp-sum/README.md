@@ -24,11 +24,12 @@ cd /home/zaqwes/My/micro-apps/agentic/ralph-cpp-sum
 chmod +x ./run-ralph.sh
 ./run-ralph.sh
 
-# option B — raw CLI
+# option B — raw CLI (--no-commit: you git add/commit manually in parent repo)
 ralph --prompt-file ./PROMPT.md \
   --agent opencode \
   --max-iterations 10 \
-  --completion-promise COMPLETE
+  --completion-promise COMPLETE \
+  --no-commit
 ```
 
 Monitor from another terminal:

@@ -32,4 +32,5 @@ exec ralph \
   --agent "$AGENT" \
   --max-iterations "$MAX_ITERATIONS" \
   --completion-promise COMPLETE \
+  --no-commit \
   "$@"

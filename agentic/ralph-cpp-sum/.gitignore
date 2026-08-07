@@ -1,0 +1,9 @@
+build/
+.cmake/
+CMakeCache.txt
+CMakeFiles/
+*.o
+*.a
+*.out
+ralph-loop.local.md
+.ralph/

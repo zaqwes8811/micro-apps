@@ -1,6 +1,17 @@
 # Task: C++ template sum + gtest
 
-Work only in this directory. Do not touch sibling projects under `agentic/`.
+**Workdir (sandbox):** `/home/zaqwes/My/micro-apps/agentic/ralph-cpp-sum`
+
+Stay **inside this directory only**. Do not leave it for any reason.
+
+## Constraints
+
+- **Sandbox** — all file reads/writes and shell commands must stay under the workdir above.
+  - Do **not** `cd ..`, `cd` to `agentic/`, home, `/tmp`, or any path outside the workdir.
+  - Do **not** read, edit, or create files in sibling folders (`../small`, `../to-micro-apps`, etc.).
+  - Use **relative paths** from the workdir (`./ralph_sum.hpp`, `./build/`, not `~/My/micro-apps/...` elsewhere).
+  - Bash: run builds/tests as `./build/...` or `cmake -S . -B build` from `.` — never from parent repos.
+  - If a tool requires an absolute path, it must still point **only** inside `ralph-cpp-sum/`.
 
 ## Goal
 
@@ -40,11 +51,11 @@ endif()
 
 - Invert the logic: **`check_cxx_source_compiles` succeeds → test fails**; **`BOOL_SUM_COMPILES` is false → test passes**.
 - You may embed the snippet above directly, or read equivalent code from `test_bool_rejection.cpp` into the string.
-- Register with `enable_testing()` + `add_test` / `ctest` if needed so `cmake --build build && ctest` runs both runtime and compile-fail checks.
+- Register with `enable_testing()` + `add_test(NAME ralph_sum_test …)` so **ctest** runs the runtime suite (do not verify by calling `./build/ralph_sum_test` directly).
 
-- A passing project means: `ralph_sum_test` runs green **and** the bool-rejection check confirms `sum(bool, …)` does not compile.
+- A passing project means: **ctest** runtime green **and** the bool-rejection check confirms `sum(bool, …)` does not compile.
 
-## Constraints
+## Build & tool constraints
 
 - **C++ standard** — prefer **C++20** (`CMAKE_CXX_STANDARD 20`, `requires` to constrain the template). If the toolchain does not support C++20, fall back to **C++17** (`CMAKE_CXX_STANDARD 17`) and use SFINAE / `std::enable_if` / `static_assert` for the same constraints.
 - **No `bool`** — `sum` must accept numeric types (integers, floating-point, etc.) but **must reject `bool`** at compile time. Examples:
@@ -60,20 +71,67 @@ endif()
 ## Checklist (update `progress.md` each iteration)
 
 - [ ] Template sum with type constraint (C++20 `requires`, or C++17 SFINAE); numeric types, **not bool**
-- [ ] gtest target `ralph_sum_test` (int, float, double, etc. — no bool)
-- [ ] Compile-fail test `test_bool_rejection.cpp` wired in CMake (bool call must not compile)
-- [ ] CMake builds and **ctest** / test run passes (runtime + compile-fail check)
-- [ ] All tests pass
+- [ ] **Runtime:** `ctest` passes (gtest via `add_test`, not manual `./build/ralph_sum_test`)
+- [ ] **Compile-time:** bool-rejection check in CMake passes (`BOOL_SUM_COMPILES` is false)
+- [ ] Full verify: configure + build + `ctest --test-dir build` exits 0
 
 ## Done criteria
 
-All checklist items are done **and**:
+Task is complete **only when both** test layers pass:
 
-- `./build/ralph_sum_test` (or `ctest`) exits 0
-- bool-rejection compile-fail test passes (i.e. `sum(bool, …)` correctly rejected)
+| Layer | Verify | Must |
+|-------|--------|------|
+| **Runtime** | `ctest --test-dir build --output-on-failure` | exit 0; tests listed and passed |
+| **Compile-time** | `cmake -S . -B build` (configure step) | `BOOL_SUM_COMPILES` failed + status *Bool rejection test PASSED* |
 
-Only then output exactly:
+### How to run tests (correct)
+
+**Always use ctest** — do **not** verify runtime by running `./build/ralph_sum_test` directly.
+
+```bash
+cmake -S . -B build
+cmake --build build
+ctest --test-dir build --output-on-failure
+```
+
+Alternative (same thing):
+
+```bash
+cd build && ctest --output-on-failure
+```
+
+**Wrong** (do not use for done verification):
+
+```bash
+./build/ralph_sum_test          # ❌ bypasses ctest registration
+ctest --output-on-failure       # ❌ from project root — finds no tests
+```
+
+Plain `ctest` from `.` without `--test-dir build` prints *No tests were found!!!* — use `--test-dir build`, not bare `ctest`.
+
+### STOP — output promise immediately
+
+When **both** are true, your **next reply** must be only verification summary + `<promise>COMPLETE</promise>`:
+
+1. `cmake -S . -B build` → *Bool rejection test PASSED*
+2. `ctest --test-dir build --output-on-failure` → exit 0, tests passed
+
+**Do not** keep working after that. **Do not** edit CMakeLists further.
+
+Verify before promising:
+
+```bash
+cmake -S . -B build && cmake --build build && ctest --test-dir build --output-on-failure
+```
+
+Compile-time bool check runs at **configure** (`cmake -S . -B build`).
+
+Only when **runtime AND compile-time tests pass** output exactly:
 
 <promise>COMPLETE</promise>
 
-Do **not** emit the promise if any test fails or the project does not build.
+Do **not** emit the promise if:
+- any gtest fails,
+- bool sum compiles when it should not,
+- build/configure fails,
+- only one of the two test layers was verified.

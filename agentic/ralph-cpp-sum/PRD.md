@@ -2,9 +2,10 @@
 
 | ID | Item | Done when |
 |----|------|-----------|
-| 1 | Template sum | `template <typename T> T sum(T a, T b)` (or equivalent) in a header |
-| 2 | gtest | Tests cover int, floating, and one more type; edge cases optional |
-| 3 | Build | `cmake -S . -B build && cmake --build build` succeeds |
-| 4 | Green | Test binary runs with exit code 0 |
+| 1 | Template sum | C++20 `requires` preferred; else C++17 SFINAE; **`bool` rejected** at compile time |
+| 2 | gtest | `test_ralph_sum.cpp` → `ralph_sum_test`; int, float, double, etc.; **no bool** |
+| 3 | Compile-fail | `test_bool_rejection.cpp`; CMake `CheckCXXSourceCompiles` — **`BOOL_SUM_COMPILES` must be false** |
+| 4 | Build | `cmake -S . -B build && cmake --build build && ctest` succeeds (C++20 or C++17) |
+| 5 | Green | Runtime tests pass; bool-rejection check passes |
 
 Completion promise: `COMPLETE` (see `PROMPT.md`).

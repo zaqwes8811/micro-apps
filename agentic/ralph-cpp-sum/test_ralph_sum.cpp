@@ -48,3 +48,35 @@ TEST(RalphSumTest, CharSum) {
     EXPECT_EQ(sum(1, 2), 3);
     EXPECT_EQ(sum(0, 0), 0);
 }
+
+// Tests for subtraction (sub) function
+TEST(RalphSubTest, IntSub) {
+    EXPECT_EQ(sub(5, 3), 2);
+    EXPECT_EQ(sub(3, 5), -2);
+    EXPECT_EQ(sub(0, 0), 0);
+    EXPECT_EQ(sub(10, 0), 10);
+    EXPECT_EQ(sub(0, 10), -10);
+}
+
+TEST(RalphSubTest, FloatSub) {
+    EXPECT_DOUBLE_EQ(sub(5.5f, 2.5f), 3.0f);
+    EXPECT_DOUBLE_EQ(sub(2.5f, 5.5f), -3.0f);
+    EXPECT_DOUBLE_EQ(sub(0.0f, 0.0f), 0.0f);
+}
+
+TEST(RalphSubTest, DoubleSub) {
+    EXPECT_DOUBLE_EQ(sub(5.0, 2.0), 3.0);
+    EXPECT_DOUBLE_EQ(sub(2.0, 5.0), -3.0);
+    EXPECT_DOUBLE_EQ(sub(0.0, 0.0), 0.0);
+}
+
+TEST(RalphSubTest, LongIntSub) {
+    EXPECT_EQ(sub(3000000000LL, 1000000000LL), 2000000000LL);
+    EXPECT_EQ(sub(-1000000000LL, 1000000000LL), -2000000000LL);
+}
+
+TEST(RalphSubTest, NegativeSub) {
+    EXPECT_EQ(sub(-5, -3), -2);
+    EXPECT_EQ(sub(-10, -5), -5);
+    EXPECT_EQ(sub(-5, -10), 5);
+}

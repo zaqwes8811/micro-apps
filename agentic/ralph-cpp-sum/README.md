@@ -1,4 +1,4 @@
-# Ralph: C++ template sum + gtest
+# Ralph: C++ template sum + sub + gtest
 
 Workdir for `@th0rgal/ralph-wiggum` + OpenCode lite / turbo3.
 

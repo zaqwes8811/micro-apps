@@ -28,17 +28,31 @@ add_test(NAME ralph_sum_test COMMAND ralph_sum_test)
 # Use CheckCXXSourceCompiles to check if sum(bool, bool) compiles
 include(CheckCXXSourceCompiles)
 
-set(TEST_CODE "
-#include \"ralph_sum.hpp\"
+# Check that sum with bool does NOT compile
+set(TEST_CODE_SUM "
+#include \\"ralph_sum.hpp\\"
 int main() { (void)sum(true, false); return 0; }
 ")
 
-check_cxx_source_compiles("${TEST_CODE}" BOOL_SUM_COMPILES)
+check_cxx_source_compiles("${TEST_CODE_SUM}" BOOL_SUM_COMPILES)
 
 # Invert the logic: bool sum must NOT compile
 if(BOOL_SUM_COMPILES)
-    message(FATAL_ERROR "bool sum must not compile")
+    message(FATAL_ERROR \\"sum with bool must not compile\\")
 endif()
 
-message(STATUS "Bool rejection test PASSED: sum(bool, ...) correctly rejected at compile time")
+# Check that sub with bool does NOT compile
+set(TEST_CODE_SUB "
+#include \\"ralph_sum.hpp\\"
+int main() { (void)sub(true, false); return 0; }
+")
+
+check_cxx_source_compiles("${TEST_CODE_SUB}" BOOL_SUB_COMPILES)
+
+# Invert the logic: bool sub must NOT compile
+if(BOOL_SUB_COMPILES)
+    message(FATAL_ERROR \\"sub with bool must not compile\\")
+endif()
+
+message(STATUS "Bool rejection test PASSED: sum and sub(bool, ...) correctly rejected at compile time")
 message(STATUS "Build completed. Run: ctest --output-on-failure")

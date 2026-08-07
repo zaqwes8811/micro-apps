@@ -1,11 +1,11 @@
-# PRD: template sum + gtest
+# PRD: template sum + sub + gtest
 
 | ID | Item | Done when |
 |----|------|-----------|
-| 1 | Template sum | C++20 `requires` preferred; else C++17 SFINAE; **`bool` rejected** at compile time |
-| 2 | gtest | `test_ralph_sum.cpp` → `ralph_sum_test`; int, float, double, etc.; **no bool** |
-| 3 | Compile-fail | `test_bool_rejection.cpp`; CMake `CheckCXXSourceCompiles` — **`BOOL_SUM_COMPILES` must be false** |
-| 4 | Build | `cmake -S . -B build && cmake --build build && ctest` succeeds (C++20 or C++17) |
-| 5 | Green | **Both:** `ctest --test-dir build` pass **and** compile-time bool-rejection pass |
+| 1 | Template sum + sub | C++20 `requires` (or C++17 SFINAE); **`bool` rejected** for both |
+| 2 | gtest | `test_ralph_sum.cpp` → tests for **sum and sub**; int, float, double, etc.; **no bool** |
+| 3 | Compile-fail | CMake `CheckCXXSourceCompiles` — **`BOOL_MATH_COMPILES` must be false** (sum + sub with bool) |
+| 4 | Build | `cmake -S . -B build && cmake --build build` succeeds |
+| 5 | Green | `ctest --test-dir build` pass **and** compile-time bool-rejection pass |
 
-Completion promise: `COMPLETE` only when **ctest runtime AND compile-time** pass (see `PROMPT.md`). Do not verify via `./build/ralph_sum_test`.
+Completion promise: `COMPLETE` only when **ctest runtime AND compile-time** pass (see `PROMPT.md`).

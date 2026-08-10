@@ -18,11 +18,34 @@ include_directories(${GTEST_INCLUDE_DIRS})
 add_executable(ralph_sum_test test_ralph_sum.cpp)
 target_link_libraries(ralph_sum_test ${GTEST_LIBRARIES} gtest_main)
 
+# Create executable for csv reader tests
+add_executable(csv_reader_test test_csv_reader.cpp csv_reader.cpp)
+target_link_libraries(csv_reader_test ${GTEST_LIBRARIES} gtest_main)
+
+# Hide binaries from ./build/<name> — agent must use ./verify.sh (see PROMPT.md)
+set_target_properties(ralph_sum_test csv_reader_test PROPERTIES
+  RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/.internal"
+)
+
+# Remove stale binaries from before RUNTIME_OUTPUT_DIRECTORY move
+file(REMOVE
+  "${CMAKE_BINARY_DIR}/ralph_sum_test"
+  "${CMAKE_BINARY_DIR}/csv_reader_test")
+
 # Enable testing framework
 enable_testing()
 
-# Add the ralph_sum_test to ctest
-add_test(NAME ralph_sum_test COMMAND ralph_sum_test)
+find_program(GNU_TIMEOUT NAMES timeout REQUIRED)
+
+# Add the ralph_sum_test to ctest (5s hard kill — hang = infinite loop in code)
+add_test(NAME ralph_sum_test
+  COMMAND ${GNU_TIMEOUT} 5 $<TARGET_FILE:ralph_sum_test>
+  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+
+# Add the csv_reader_test to ctest
+add_test(NAME csv_reader_test
+  COMMAND ${GNU_TIMEOUT} 5 $<TARGET_FILE:csv_reader_test>
+  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 
 # Verify that bool_rejection_test fails to compile (compile-time bool rejection test)
 # Use CheckCXXSourceCompiles to check if sum(bool, bool) compiles

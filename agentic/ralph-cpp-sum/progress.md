@@ -2,28 +2,17 @@
 
 ## Status
 
-- [x] Template `sum` and `sub` with type constraint (numeric, not bool) - C++20 `requires` clause
-- [x] gtest covers both `sum` and `sub` (int, float, double, long long, char)
-- [x] Runtime: `ctest --test-dir build` passes (100% tests passed)
-- [x] Compile-time: `BOOL_SUM_COMPILES` and `BOOL_SUB_COMPILES` are false (sum and sub reject bool)
-- [x] Full verify: configure + build + `ctest --test-dir build` exits 0
+- [ ] **`CsvReader`** — constructor `(path, has_header)`; skip header when `has_header == true`; `read_row`, `reset`, EOF, missing file
+- [ ] **`test_data/sample.csv`** fixture (header + 2 data rows)
+- [ ] gtest **`csv_reader_test`** — `has_header=true` on fixture; opens, data rows, EOF, missing file, reset
+- [ ] CMake: `csv_reader_test` registered with `WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}`
+- [ ] **Runtime:** `ctest --test-dir build` — **2 tests** pass (`ralph_sum_test` + `csv_reader_test`)
+- [ ] **Full verify:** configure + build + `ctest --test-dir build` exits 0 (no sum/sub regression)
 
 ## Log
 
 <!-- Ralph: append iteration notes below -->
 
-**Iteration 3/10 - COMPLETE (Verification)**
+Scope: **CsvReader only**. Sum/sub + bool-rejection done — do not regress.
 
-Changes verified in this iteration:
-1. Confirmed `ralph_sum.hpp` has both `sum` and `sub` with C++20 `requires` clause rejecting `bool`
-2. Confirmed `test_ralph_sum.cpp` has comprehensive gtest coverage for both functions (int, float, double, long long, char)
-3. Confirmed `CMakeLists.txt` uses `CheckCXXSourceCompiles` to verify bool rejection at compile time
-4. Verified build: `cmake -S . -B build` - BOOL_SUM_COMPILES and BOOL_SUB_COMPILES both failed (correct behavior)
-5. Verified build: `cmake --build build` - built successfully
-6. Verified tests: `ctest --test-dir build --output-on-failure` - 100% tests passed
-
-**Done criteria met:**
-- `ctest --test-dir build --output-on-failure` → exit 0, tests listed and passed ✅
-- `cmake -S . -B build` → BOOL_MATH_COMPILES (BOOL_SUM_COMPILES + BOOL_SUB_COMPILES) failed + Bool rejection test PASSED ✅
-
-<promise>COMPLETE</promise>
+Harness split 2026-08-10: task spec → `PRD.md`, stable rules → `PROMPT.md`, checklist here.

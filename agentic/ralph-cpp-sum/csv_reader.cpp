@@ -5,14 +5,20 @@
 
 #include "csv_reader.hpp"
 
-CsvReader::CsvReader(const std::string& path)
-    : m_file(path, std::ios::in), m_open(false), m_current_line(""), m_row_count(0) {
+CsvReader::CsvReader(const std::string& path, bool has_header)
+    : m_path(path), m_file(path, std::ios::in), m_open(false), m_has_header(has_header), m_header_skipped(false), m_current_line(""), m_row_count(0) {
   if (m_file.is_open()) {
     m_open = true;
     // Clear file state
     m_file.clear();
     m_file.seekg(0, std::ios::beg);
     m_row_count = 0;
+    // Skip header if has_header is true
+    if (m_has_header) {
+      std::string dummy;
+      std::getline(m_file, dummy); // Skip the header line
+      m_header_skipped = true;
+    }
   }
 }
 
@@ -23,6 +29,14 @@ bool CsvReader::is_open() const {
 bool CsvReader::read_row(std::vector<std::string>& cols) {
   if (!m_open) {
     return false;
+  }
+
+  // Skip header if has_header is true and header not yet skipped
+  if (m_has_header && !m_header_skipped) {
+    m_header_skipped = true;
+    std::string dummy;
+    std::getline(m_file, dummy); // Skip the header line
+    return false; // Return false because we're still in the process of skipping
   }
 
   // Get the next line
@@ -66,8 +80,14 @@ bool CsvReader::read_row(std::vector<std::string>& cols) {
 }
 
 void CsvReader::reset() {
-  m_file.clear();
-  m_file.seekg(0, std::ios::beg);
-  m_current_line.clear();
+  // Clear state and re-open file
+  m_file.close();
+  m_file = std::ifstream(m_path, std::ios::in);
+  m_open = m_file.is_open();
+  if (m_open) {
+    m_file.clear();
+    m_file.seekg(0, std::ios::beg);
+  }
+  m_header_skipped = false;
   m_row_count = 0;
 }

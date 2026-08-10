@@ -12,15 +12,18 @@
 
 class CsvReader {
 public:
-  explicit CsvReader(const std::string& path);
+  explicit CsvReader(const std::string& path, bool has_header = false);
   
   bool is_open() const;
   bool read_row(std::vector<std::string>& cols);
   void reset();
 
 private:
+  std::string m_path;
   std::ifstream m_file;
   bool m_open;
+  bool m_has_header;
+  bool m_header_skipped;
   std::string m_current_line;
   int m_row_count;
 };

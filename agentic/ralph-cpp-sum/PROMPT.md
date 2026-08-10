@@ -4,151 +4,63 @@
 
 Stay **inside this directory only**. Do not leave it for any reason.
 
+## Fast exit (read progress.md first)
+
+If **every** Status line in `progress.md` is `[x]` (zero `[ ]`):
+
+1. **One** bash tool call: `./verify.sh`
+2. If green (`100% tests passed, 0 tests failed out of 2`, exit 0): your **next** message must be **only** the completion promise tag from `PRD.md` — **nothing else**. No criteria list, no summary, no progress edit, no second verify, no `echo $?`.
+3. If verify fails: fix code → `./verify.sh` once → then step 2.
+
+**Do not** edit `progress.md` when all items are already `[x]`. **Do not** run `./verify.sh` more than once when output is already green.
+
 ## Current task
 
-1. Read **`PRD.md`** — scope, requirements, acceptance criteria for the current feature.
-2. Read **`progress.md`** — checklist and iteration log; update checklist each iteration.
-3. **Do not regress** existing work (`ralph_sum.hpp`, `test_ralph_sum.cpp`, bool-rejection in `CMakeLists.txt`).
+1. Read **`PRD.md`** — scope, requirements, acceptance criteria.
+2. Read **`progress.md`** — if any `[ ]`, do that item; if all `[x]`, use **Fast exit** above.
+3. **Do not regress** sum/sub + bool-rejection.
 
 ## Sandbox
 
-- All file reads/writes and shell commands must stay under the workdir above.
-- Do **not** `cd ..`, `cd` to `agentic/`, home, `/tmp`, or any path outside the workdir.
-- Do **not** read, edit, or create files in sibling folders (`../small`, `../to-micro-apps`, etc.).
-- Use **relative paths** from the workdir (`./csv_reader.hpp`, `./build/`).
-- Bash: run builds/tests from `.` — never from parent repos.
+- All reads/writes/shell under this workdir only.
+- No `cd ..`, `/tmp`, sibling folders.
+- Relative paths from `.` (`test_data/sample.csv`).
 
 ## Build & verify
 
-**FORBIDDEN (OpenCode denies + no binary at `./build/*_test`):** `./build/csv_reader_test`, `./build/ralph_sum_test`, `ctest`, any path under `build/.internal/`. Running them hangs without timeout and kills llama-server.
-
-After each meaningful change, run **one** bash call from project root:
+**FORBIDDEN:** `./build/*_test`, `ctest`, `build/.internal/*` — use **only** `./verify.sh`.
 
 ```bash
 ./verify.sh
 ```
 
-This is the **only** allowed way to run tests. Do not run bare `ctest` or any test binary.
+- Per-test cap **5 s** (CMake); whole run cap **15 s** (`verify.sh`).
+- Exit **124** or run >15 s → infinite loop in code; fix, then verify once.
 
-**Test duration (enforced in harness, not optional):**
+Green output must include: `Bool rejection test PASSED`, both tests **Passed**, `100% tests passed, 0 tests failed out of 2`, exit **0**.
 
-- Each test runs under **`timeout 5`** (wired in `CMakeLists.txt`).
-- Whole verify capped at **15s** (`verify.sh`).
-- If verify **exceeds ~15s** or a test shows **Timeout / exit 124** → **infinite loop in the code**. Fix implementation, rebuild, re-run `./verify.sh`. Do not retry unchanged.
-
-### Required green output (all three layers)
-
-**Layer A — compile-time (bool rejection)** — must appear in `./verify.sh` stdout during configure:
-
-```
-Bool rejection test PASSED: sum and sub(bool, ...) correctly rejected at compile time
-```
-
-**Layer B — runtime (math)** — in ctest section:
-
-```
-Start 1: ralph_sum_test
-...
-Passed
-```
-
-**Layer C — runtime (csv)** — in ctest section:
-
-```
-Start 2: csv_reader_test
-...
-Passed
-```
-
-**Layer D — ctest summary** — exact requirement:
-
-```
-100% tests passed, 0 tests failed out of 2
-```
-
-**Layer E — exit code:** `./verify.sh` must exit **0**. Exit **8**, **124**, or non-zero = **NOT DONE**.
-
-If any layer is missing, failed, timed out, or shows `***Failed` / `Subprocess killed` → **keep working**. Do **not** emit COMPLETE.
-
-Expected when green:
-
-```
-Bool rejection test PASSED: sum and sub(bool, ...) correctly rejected at compile time
-...
-Start 1: ralph_sum_test
-1/2 Test #1: ralph_sum_test ...................   Passed
-Start 2: csv_reader_test
-2/2 Test #2: csv_reader_test ..................   Passed
-100% tests passed, 0 tests failed out of 2
-```
-
-**Wrong:**
-
-```bash
-ctest --test-dir build --output-on-failure    # ❌ bypasses verify.sh hard cap
-./build/csv_reader_test                       # ❌ wrong cwd; no timeout wrapper
-cd build && ctest                             # ❌ wrong cwd
-"../test_data/sample.csv" in test code        # ❌ use test_data/sample.csv
-```
-
-Do not run git commands (disabled in OpenCode); the human commits from the parent repo.
-
-## Agent execution rules (critical on 4GB VRAM / turbo3)
-
-**Act, don't narrate.** Long text without tool calls causes timeouts (exit 137) and can crash llama-server.
+## Agent rules (4GB VRAM / turbo3)
 
 | Rule | Do | Don't |
 |------|----|-------|
-| After edit | **Immediately** run `./verify.sh` | Narrate plans without a tool call |
-| Verify | Always `./verify.sh` from project root | Bare `ctest` or direct test binaries |
-| Replies | ≤ 2 short sentences between tool calls | Long explanations before verify |
-| On test fail / timeout | Fix code → `./verify.sh` again | Retry same command unchanged |
-| verify > 15s or exit 124 | **Infinite loop** — fix code | Wait, blame environment |
-| Before COMPLETE | `./verify.sh` in **this turn** with exit 0 | Promise from memory or prior iteration |
+| Already done | Fast exit: 1× verify → promise only | Re-verify, edit progress, narrate criteria |
+| After code edit | `./verify.sh` immediately | Text-only reply before verify |
+| Replies | ≤2 short sentences between tools | Long acceptance-criteria lists |
+| Complete | Promise tag **alone** on last line | Paragraph before promise |
 
-After a code edit, your **very next action** must be `./verify.sh` — **same turn**, no intermediate text-only reply.
-
-If llama-server died (tab closed): **stop** — human must restart `./rtx3050-4g/llamacpp-serve-qwen35-4b-turbo3.sh` before you continue.
+Do not run git. If llama tab died → stop (human restarts server).
 
 ## Checklist
 
-Update **`progress.md`** each iteration. Do not duplicate the checklist here.
+When work remains: update **`progress.md`** (use **edit**, not write, for small log lines). When all `[x]`: **do not touch** progress.md.
 
-## STOP — COMPLETE gate (strict)
+## COMPLETE gate
 
-Emit `<promise>COMPLETE</promise>` **only** when **every** gate below is true **in the same iteration**:
+Emit the completion promise tag from **`PRD.md`** only when:
 
-| # | Gate | Required |
-|---|------|----------|
-| 1 | Tool call | You ran `./verify.sh` via bash **in this turn** (not a previous iteration) |
-| 2 | Exit code | Tool output shows verify exited **0** |
-| 3 | Compile-time | Output contains `Bool rejection test PASSED` |
-| 4 | Runtime | Output contains `100% tests passed, 0 tests failed out of 2` |
-| 5 | Both suites | Both `ralph_sum_test` and `csv_reader_test` show **Passed** (not Failed / Timeout / Subprocess killed) |
-| 6 | No regression | No `FATAL_ERROR`, no `BOOL_*_COMPILES` configure failure |
+- You ran `./verify.sh` **in this turn** and output is green, **or**
+- Fast exit applies (all `[x]` + one green verify).
 
-### Forbidden COMPLETE (instant reject)
+**Forbidden:** promise without green verify in this turn; promise plus extra text (summary, checklist, tool calls after verify); running verify twice when first run was green.
 
-Do **not** emit COMPLETE if **any** of these is true:
-
-- No bash tool call in this turn
-- `Tools: none` and you only output text
-- You did not run `./verify.sh` in this iteration
-- Last `./verify.sh` failed, timed out, or exited non-zero
-- Output shows `50% tests passed`, `***Failed`, `Subprocess killed`, or test duration ~5s with failure (timeout = infinite loop — fix code first)
-- Only compile-time passed but runtime csv failed (or vice versa)
-- You "believe" tests pass without fresh tool output in this turn
-- Checklist in `progress.md` still has unchecked items
-
-### How to finish (only valid sequence)
-
-1. Fix code until `./verify.sh` is green (all layers A–E above).
-2. Run `./verify.sh` — **same turn**, last tool call before your reply.
-3. Reply: **one short paragraph** quoting verify exit 0 + `100% tests passed, 0 tests failed out of 2` + `Bool rejection test PASSED`.
-4. Last line only: `<promise>COMPLETE</promise>`
-
-**Invalid:** reply with COMPLETE without step 2 in the same turn.
-
-<promise>COMPLETE</promise>
-
-The line above is a **format example only**. Output it **once**, on its own line, **only** after a green `./verify.sh` in the same turn. Never copy this example as completion without verify output.
+The promise tag is defined in `PRD.md` — copy it exactly on its own line with no prefix or suffix.

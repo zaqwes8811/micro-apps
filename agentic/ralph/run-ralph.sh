@@ -29,8 +29,9 @@ fi
 
 export REAL_OPENCODE="$(command -v opencode)"
 export RALPH_OPENCODE_BINARY="$HARNESS/bin/opencode"
-export RALPH_RUNTIME_CONFIG="$HARNESS/.opencode.runtime.json"
-chmod +x "$RALPH_OPENCODE_BINARY"
+export RALPH_OPENCODE_USER_CONFIG="${HOME}/.config/opencode/opencode.json"
+export RALPH_RUNTIME_CONFIG="${RALPH_RUNTIME_CONFIG:-$(dirname "$RALPH_OPENCODE_USER_CONFIG")/ralph-loop.runtime.json}"
+chmod +x "$RALPH_OPENCODE_BINARY" "$HARNESS/bin/opencode-runtime-config.py"
 
 # Ralph 1.2.2 hashes every `git ls-files` path in cwd before spawning OpenCode.
 # Point Ralph git at the tiny harness repo so it does not walk the workdir tree.
@@ -39,42 +40,6 @@ if [[ ! -d "$HARNESS/.git" ]]; then
 fi
 export GIT_DIR="$HARNESS/.git"
 export GIT_WORK_TREE="$HARNESS"
-
-python3 - "${HOME}/.config/opencode/opencode.json" "$RALPH_RUNTIME_CONFIG" <<'PY'
-import json, re, sys
-from pathlib import Path
-
-def load(p):
-    path = Path(p)
-    return json.loads(path.read_text(encoding="utf-8")) if path.is_file() else {}
-
-def rewrite(obj, base: Path):
-    if isinstance(obj, dict):
-        return {k: rewrite(v, base) for k, v in obj.items()}
-    if isinstance(obj, list):
-        return [rewrite(v, base) for v in obj]
-    if isinstance(obj, str):
-        m = re.fullmatch(r"\{file:(\./[^}]+)\}", obj)
-        if m:
-            return "{file:" + str(base / m.group(1)[2:]) + "}"
-        return obj
-    return obj
-
-user, out = sys.argv[1], sys.argv[2]
-user_path = Path(user)
-cfg = rewrite(load(user), user_path.parent)
-cfg["snapshot"] = False
-cfg["lsp"] = False
-cfg["watcher"] = {"ignore": ["**/*"]}
-cfg["compaction"] = {
-    "auto": False,
-    "prune": True,
-    "reserved": 1024,
-    "tail_turns": 1,
-}
-cfg["tool_output"] = {"max_lines": 15, "max_bytes": 1024}
-Path(out).write_text(json.dumps(cfg, indent=2) + "\n", encoding="utf-8")
-PY
 
 RALPH_HELP="$(ralph --help 2>&1 || true)"
 TIMEOUT_ARGS=()
@@ -92,7 +57,8 @@ echo "cwd: $WORKDIR"
 echo "harness: $HARNESS"
 echo "ralph agent: $AGENT"
 echo "opencode agent: $OPENCODE_AGENT"
-echo "OPENCODE_CONFIG: $RALPH_RUNTIME_CONFIG (snapshot=false)"
+echo "OPENCODE_CONFIG: $RALPH_RUNTIME_CONFIG (from $RALPH_OPENCODE_USER_CONFIG)"
+python3 "$HARNESS/bin/opencode-runtime-config.py" diff "$RALPH_OPENCODE_USER_CONFIG"
 echo "opencode via: $RALPH_OPENCODE_BINARY -> $REAL_OPENCODE"
 echo "max-iterations: $MAX_ITERATIONS"
 echo "Ralph git: $GIT_WORK_TREE (not workdir ls-files)"

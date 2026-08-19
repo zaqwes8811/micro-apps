@@ -21,6 +21,6 @@ Start each iteration: `./ralph/bin/list-open.sh` once.
 
 | stdout | next |
 |---|---|
-| `IDLE` | Entire reply is only `IDLE`. |
-| `gate` | `./ralph/bin/gate-0001.sh`. `SUCCESS` → entire reply is only `IDLE`. |
+| `IDLE` | **Exit Ralph loop.** Entire reply is only `IDLE`. No bash. No English. |
+| `gate` | `./ralph/bin/gate-0001.sh`. `SUCCESS` → **exit loop:** entire reply is only `IDLE`. |
 | else | that line is the bash. Then `./ralph/bin/tick.sh`. Then `STOP`. |

@@ -13,6 +13,7 @@ AGENT="${AGENT:-opencode}"
 OPENCODE_AGENT="${OPENCODE_AGENT:-ralph-4b}"
 LAST_ACTIVITY_TIMEOUT="${LAST_ACTIVITY_TIMEOUT:-5m}"
 PROMPT_FILE="${PROMPT_FILE:-$HARNESS/PROMPT.md}"
+PROMPT_TEMPLATE="${PROMPT_TEMPLATE:-$HARNESS/prompt.template.md}"
 
 if ! command -v ralph >/dev/null 2>&1; then
   echo "ralph not found. Install: npm install -g @th0rgal/ralph-wiggum"
@@ -63,6 +64,7 @@ echo "opencode via: $RALPH_OPENCODE_BINARY -> $REAL_OPENCODE"
 echo "max-iterations: $MAX_ITERATIONS"
 echo "Ralph git: $GIT_WORK_TREE (not workdir ls-files)"
 echo "prompt: $PROMPT_FILE"
+echo "prompt-template: $PROMPT_TEMPLATE"
 echo
 
 # if [[ "$(./ralph/bin/list-open.sh 2>/dev/null || echo STOP)" == "IDLE" ]]; then
@@ -72,6 +74,7 @@ echo
 
 exec ralph \
   --prompt-file "$PROMPT_FILE" \
+  --prompt-template "$PROMPT_TEMPLATE" \
   --agent "$AGENT" \
   --max-iterations "$MAX_ITERATIONS" \
   --completion-promise "IDLE" \

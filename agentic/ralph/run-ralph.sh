@@ -103,8 +103,8 @@ echo "Ralph git: $GIT_WORK_TREE (not workdir ls-files)"
 echo "prompt: $PROMPT_FILE"
 echo
 
-if [[ "$(./ralph/bin/list-open.sh 2>/dev/null || echo STOP)" == "idle" ]]; then
-  echo "Completion: idle — no open tasks."
+if [[ "$(./ralph/bin/list-open.sh 2>/dev/null || echo STOP)" == "IDLE" ]]; then
+  echo "Completion: IDLE — no open tasks."
   exit 0
 fi
 
@@ -112,7 +112,7 @@ exec ralph \
   --prompt-file "$PROMPT_FILE" \
   --agent "$AGENT" \
   --max-iterations "$MAX_ITERATIONS" \
-  --completion-promise "idle" \
+  --completion-promise "IDLE" \
   --no-commit \
   "${TIMEOUT_ARGS[@]}" \
   "${OPENCODE_ARGS[@]}"

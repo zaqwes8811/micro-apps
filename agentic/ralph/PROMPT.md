@@ -6,13 +6,14 @@ Start each iteration: `./ralph/bin/list-open.sh` once.
 
 | stdout | next |
 |---|---|
-| `idle` | **stop.** Entire reply is only `<promise>idle</promise>`. No read, no tick, no other bash. |
+| `IDLE` | **stop.** Entire reply is only `IDLE`. No bash this turn. |
 | `tick` | `./ralph/bin/tick.sh`, then STOP |
 | `gate` | `./ralph/bin/gate-0001.sh`; `SUCCESS` → `./ralph/bin/tick.sh`, STOP |
 | **3 lines** | see below |
 
-**Three lines** (in order):
+## Read action (3 steps in order)
 
-1. tool **read** line 1 (`ralph/progress.md`) — `offset=1`, `limit=15`
-2. tool **read** line 2 (task path) — same
-3. bash line 3 exactly as printed (e.g. `./ralph/bin/read-lines.sh config.yaml 1 10`). Then `./ralph/bin/tick.sh`, STOP
+1. `read-progress ralph/progress.md 1 15`
+2. `read-task <task_path> 1 15`  (from line 2)
+3. `read-lines <path_from_line_3> <start> <end>`
+4. `tick` → STOP

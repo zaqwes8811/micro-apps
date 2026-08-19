@@ -1,0 +1,40 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "snapshot": false,
+  "lsp": false,
+  "watcher": {
+    "ignore": ["**/*"]
+  },
+  "compaction": {
+    "auto": false,
+    "prune": true,
+    "reserved": 1024,
+    "tail_turns": 1
+  },
+  "tool_output": {
+    "max_lines": 15,
+    "max_bytes": 1024
+  },
+  "permission": {
+    "read": {
+      "*ralph/*.md": "allow",
+      "*ralph/**/*.md": "allow"
+    },
+    "write": {
+      "*ralph/*": "deny",
+      "*ralph/**": "deny"
+    },
+    "edit": {
+      "*ralph/*": "deny",
+      "*ralph/**": "deny"
+    },
+    "bash": {
+      "*": "deny",
+      "./ralph/bin/*": "allow",
+      "./ralph/bin/* *": "allow",
+      "*/ralph/bin/*": "allow",
+      "*/ralph/bin/* *": "allow",
+      "echo *": "allow"
+    }
+  }
+}

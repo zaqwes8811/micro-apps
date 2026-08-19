@@ -1,5 +1,4 @@
 .opencode.runtime.json
 bin/opencode
-wrap.log
 .gate-pass
 .build-read-off

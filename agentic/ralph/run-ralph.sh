@@ -40,7 +40,7 @@ fi
 export GIT_DIR="$HARNESS/.git"
 export GIT_WORK_TREE="$HARNESS"
 
-python3 - "${HOME}/.config/opencode/opencode.json" "$HARNESS/opencode.json" "$RALPH_RUNTIME_CONFIG" <<'PY'
+python3 - "${HOME}/.config/opencode/opencode.json" "$RALPH_RUNTIME_CONFIG" <<'PY'
 import json, re, sys
 from pathlib import Path
 
@@ -60,23 +60,19 @@ def rewrite(obj, base: Path):
         return obj
     return obj
 
-def merge(base, extra):
-    """Deep merge so the harness can override one nested key (e.g.
-    permission.bash) without dropping the rest of the user config."""
-    for k, v in extra.items():
-        if isinstance(v, dict) and isinstance(base.get(k), dict):
-            merge(base[k], v)
-        else:
-            base[k] = v
-    return base
-
-user, extra, out = sys.argv[1], sys.argv[2], sys.argv[3]
+user, out = sys.argv[1], sys.argv[2]
 user_path = Path(user)
 cfg = rewrite(load(user), user_path.parent)
-merge(cfg, load(extra))
 cfg["snapshot"] = False
 cfg["lsp"] = False
 cfg["watcher"] = {"ignore": ["**/*"]}
+cfg["compaction"] = {
+    "auto": False,
+    "prune": True,
+    "reserved": 1024,
+    "tail_turns": 1,
+}
+cfg["tool_output"] = {"max_lines": 15, "max_bytes": 1024}
 Path(out).write_text(json.dumps(cfg, indent=2) + "\n", encoding="utf-8")
 PY
 
@@ -103,10 +99,10 @@ echo "Ralph git: $GIT_WORK_TREE (not workdir ls-files)"
 echo "prompt: $PROMPT_FILE"
 echo
 
-if [[ "$(./ralph/bin/list-open.sh 2>/dev/null || echo STOP)" == "IDLE" ]]; then
-  echo "Completion: IDLE — no open tasks."
-  exit 0
-fi
+# if [[ "$(./ralph/bin/list-open.sh 2>/dev/null || echo STOP)" == "IDLE" ]]; then
+#   echo "Completion: IDLE — no open tasks."
+#   exit 0
+# fi
 
 exec ralph \
   --prompt-file "$PROMPT_FILE" \
